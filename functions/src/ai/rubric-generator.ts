@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-export const generateRubric = functions.https.onCall(async (data, context) => {
+export const generateRubric = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const { grade, learningArea, taskDescription, criteria, performanceLevels, language } = data;

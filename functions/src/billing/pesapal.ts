@@ -18,12 +18,12 @@ export async function checkPaymentStatus(orderId: string): Promise<string> {
   return "";
 }
 
-export const initiatePesapalPayment = functions.https.onCall(async (data, context) => {
+export const initiatePesapalPayment = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
   const { plan } = data;
   return { success: true, redirectUrl: "" };
 });
 
-export const pesapalWebhook = functions.https.onRequest(async (req, res) => {
+export const pesapalWebhook = functions.region("africa-south1").https.onRequest(async (req, res) => {
   res.status(200).json({ received: true });
 });

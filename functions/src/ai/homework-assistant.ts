@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-export const homeworkHelp = functions.https.onCall(async (data, context) => {
+export const homeworkHelp = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const { question, grade, learningArea, subject } = data;

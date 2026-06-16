@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 
-export const smartSearch = functions.https.onCall(async (data, context) => {
+export const smartSearch = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const { query, filters } = data;

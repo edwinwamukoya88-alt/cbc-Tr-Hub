@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-export const generateSchemeOfWork = functions.https.onCall(async (data, context) => {
+export const generateSchemeOfWork = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const { grade, learningArea, term, year, weeks, strands, biblicalIntegration } = data;

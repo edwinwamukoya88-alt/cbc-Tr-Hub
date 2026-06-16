@@ -8,6 +8,8 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged,
   updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/auth";
@@ -39,6 +41,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string, phone?: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   setError: (error: string | null) => void;
@@ -134,6 +137,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const signInWithGoogle = useCallback(async () => {
+    dispatch({ type: "SET_LOADING", payload: true });
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Google sign in failed";
+      dispatch({ type: "SET_ERROR", payload: message });
+      throw err;
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     await firebaseSignOut(auth);
     dispatch({ type: "SIGN_OUT" });
@@ -149,7 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, signIn, signUp, signOut, resetPassword, setError }}
+      value={{ ...state, signIn, signUp, signInWithGoogle, signOut, resetPassword, setError }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-export const checkQuality = functions.https.onCall(async (data, context) => {
+export const checkQuality = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const { content, contentType, grade, learningArea } = data;

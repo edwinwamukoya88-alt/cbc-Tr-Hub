@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-export const generateExam = functions.https.onCall(async (data, context) => {
+export const generateExam = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const { grade, learningArea, strand, subStrand, questionTypes, bloomLevels, totalMarks, duration, includeMarkingScheme, language } = data;

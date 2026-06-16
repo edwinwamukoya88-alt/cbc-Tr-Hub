@@ -6,6 +6,7 @@
   "functions": {
     "source": "functions",
     "runtime": "nodejs20",
+    "region": "africa-south1",
     "ignore": ["node_modules", ".git"]
   },
   "storage": {

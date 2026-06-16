@@ -2,7 +2,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 admin.initializeApp();
 
-export const generateLessonPlan = functions.https.onCall(async (data, context) => {
+export const generateLessonPlan = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const { grade, learningArea, strand, subStrand, duration, biblicalIntegration, language } = data;

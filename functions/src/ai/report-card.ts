@@ -13,7 +13,7 @@ interface ReportCardInput {
   principalName: string;
 }
 
-export const generateReportCard = functions.https.onCall(async (data, context) => {
+export const generateReportCard = functions.region("africa-south1").https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Authentication required");
 
   const {
