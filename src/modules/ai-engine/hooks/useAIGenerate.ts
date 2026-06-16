@@ -1,10 +1,8 @@
 "use client";
 import { useState, useCallback } from "react";
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth } from "firebase/auth";
 import { app } from "@/lib/firebase/auth";
 import { AIGenerationType, AIGenerationInputs, AIGenerationResult } from "../types";
-
-const functions = getFunctions(app);
 
 export function useAIGenerate(type: AIGenerationType) {
   const [loading, setLoading] = useState(false);
@@ -16,10 +14,26 @@ export function useAIGenerate(type: AIGenerationType) {
     setError(null);
     setResult(null);
     try {
-      const fn = httpsCallable(functions, `generate${type.replace(/_/g, "").replace(/^\w/, c => c.toUpperCase())}`);
-      const response = await fn({ type, ...inputs });
-      setResult(response.data as AIGenerationResult);
-      return response.data as AIGenerationResult;
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+      if (!user) throw new Error("Not authenticated");
+
+      const token = await user.getIdToken();
+
+      const res = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ type, ...inputs }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Request failed with status ${res.status}`);
+      }
+
+      const data = (await res.json()) as AIGenerationResult;
+      setResult(data);
+      return data;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Generation failed";
       setError(message);

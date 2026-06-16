@@ -3,16 +3,7 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20",
-    "region": "africa-south1",
-    "ignore": ["node_modules", ".git"]
-  },
   "storage": {
     "rules": "storage.rules"
-  },
-  "hosting": {
-    "ignore": ["firebase.json", "**/node_modules/**"]
   }
 }
