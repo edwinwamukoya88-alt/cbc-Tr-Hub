@@ -19,6 +19,7 @@ export function useCurriculumSelector() {
   const [selectedSubStrand, setSelectedSubStrand] = useState<string>("");
 
   const fetchGrades = useCallback(async () => {
+    if (!db) return;
     setLoading(true);
     try {
       const snap = await getDocs(query(collection(db, "curriculum"), orderBy("order")));
@@ -29,6 +30,7 @@ export function useCurriculumSelector() {
   }, []);
 
   const fetchLearningAreas = useCallback(async (gradeId: string) => {
+    if (!db) return;
     setLoading(true);
     setSelectedGrade(gradeId);
     setSelectedArea("");
@@ -43,6 +45,7 @@ export function useCurriculumSelector() {
   }, []);
 
   const fetchStrands = useCallback(async (gradeId: string, areaId: string) => {
+    if (!db) return;
     setLoading(true);
     setSelectedArea(areaId);
     setSelectedStrand("");
@@ -56,6 +59,7 @@ export function useCurriculumSelector() {
   }, []);
 
   const fetchSubStrands = useCallback(async (gradeId: string, areaId: string, strandId: string) => {
+    if (!db) return;
     setLoading(true);
     setSelectedStrand(strandId);
     setSelectedSubStrand("");

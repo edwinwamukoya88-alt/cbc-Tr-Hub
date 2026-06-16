@@ -53,27 +53,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
+    if (!auth) {
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Firebase is not configured. Check that environment variables are set.",
+      });
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-          if (userDoc.exists()) {
-            dispatch({
-              type: "SET_USER",
-              payload: mapFirebaseUserToAppUser(
-                firebaseUser,
-                userDoc.data() as Partial<User>
-              ),
-            });
-          } else {
-            const newUser = mapFirebaseUserToAppUser(firebaseUser);
+          if (db) {
+            const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+            if (userDoc.exists()) {
+              dispatch({
+                type: "SET_USER",
+                payload: mapFirebaseUserToAppUser(
+                  firebaseUser,
+                  userDoc.data() as Partial<User>
+                ),
+              });
+              return;
+            }
+          }
+
+          const newUser = mapFirebaseUserToAppUser(firebaseUser);
+          if (db) {
             await setDoc(doc(db, "users", firebaseUser.uid), {
               ...newUser,
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             });
-            dispatch({ type: "SET_USER", payload: newUser });
           }
+          dispatch({ type: "SET_USER", payload: newUser });
         } catch {
           dispatch({
             type: "SET_USER",
@@ -89,6 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
+    if (!auth) {
+      dispatch({ type: "SET_ERROR", payload: "Firebase is not configured." });
+      return;
+    }
     dispatch({ type: "SET_LOADING", payload: true });
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -101,6 +118,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = useCallback(
     async (email: string, password: string, name: string, phone?: string) => {
+      if (!auth || !db) {
+        dispatch({ type: "SET_ERROR", payload: "Firebase is not configured." });
+        return;
+      }
       dispatch({ type: "SET_LOADING", payload: true });
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -137,7 +158,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogleCb = useCallback(async () => {
+    if (!auth) {
+      dispatch({ type: "SET_ERROR", payload: "Firebase is not configured." });
+      return;
+    }
     dispatch({ type: "SET_LOADING", payload: true });
     try {
       const provider = new GoogleAuthProvider();
@@ -150,11 +175,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    if (!auth) return;
     await firebaseSignOut(auth);
     dispatch({ type: "SIGN_OUT" });
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
+    if (!auth) {
+      dispatch({ type: "SET_ERROR", payload: "Firebase is not configured." });
+      return;
+    }
     await sendPasswordResetEmail(auth, email);
   }, []);
 
@@ -164,7 +194,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, signIn, signUp, signInWithGoogle, signOut, resetPassword, setError }}
+      value={{
+        ...state,
+        signIn,
+        signUp,
+        signInWithGoogle: signInWithGoogleCb,
+        signOut,
+        resetPassword,
+        setError,
+      }}
     >
       {children}
     </AuthContext.Provider>

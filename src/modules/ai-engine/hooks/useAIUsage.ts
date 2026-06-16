@@ -12,7 +12,7 @@ export function useAIUsage() {
   return useQuery({
     queryKey: ["ai-usage", user?.uid, month],
     queryFn: async () => {
-      if (!user) return null;
+      if (!user || !db) return null;
       const docRef = doc(db, "ai_usage", user.uid, "monthly", month);
       const snap = await getDoc(docRef);
       return snap.data() || {};

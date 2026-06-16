@@ -9,7 +9,7 @@ export function useMyLibrary() {
   return useQuery({
     queryKey: ["my-library", user?.uid],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !db) return [];
       const q = query(collection(db, "resources"), where("authorId", "==", user.uid), where("status", "==", "published"));
       const snap = await getDocs(q);
       return snap.docs.map(d => ({ id: d.id, ...d.data() }));

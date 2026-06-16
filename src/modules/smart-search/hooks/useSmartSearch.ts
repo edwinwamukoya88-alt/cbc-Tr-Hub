@@ -3,8 +3,6 @@ import { useState, useCallback } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { app } from "@/lib/firebase/auth";
 
-const functions = getFunctions(app);
-
 export function useSmartSearch() {
   const [results, setResults] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<any[]>([]);
@@ -16,13 +14,17 @@ export function useSmartSearch() {
     setLoading(true);
     setInterpreting(true);
     try {
-      const fn = httpsCallable(functions, "smartSearch");
-      const response = await fn({ query });
-      const data = response.data as any;
-      setResults(data.results || []);
-      setRecommendations(data.recommendations || []);
-      setInterpreted(data.interpreted);
-      return data;
+      if (app) {
+        const functions = getFunctions(app);
+        const fn = httpsCallable(functions, "smartSearch");
+        const response = await fn({ query });
+        const data = response.data as any;
+        setResults(data.results || []);
+        setRecommendations(data.recommendations || []);
+        setInterpreted(data.interpreted);
+        return data;
+      }
+      return null;
     } finally {
       setLoading(false);
       setInterpreting(false);

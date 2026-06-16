@@ -7,6 +7,7 @@ export function useResources(filters?: Record<string, string>) {
   return useQuery({
     queryKey: ["resources", filters],
     queryFn: async () => {
+      if (!db) return [];
       const constraints: any[] = [where("status", "==", "published"), orderBy("createdAt", "desc"), limit(20)];
       const q = query(collection(db, "resources"), ...constraints);
       const snap = await getDocs(q);

@@ -1,21 +1,25 @@
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
-import firebaseConfig from "./config";
+import { initializeApp, getApps } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { firebaseConfig, isFirebaseConfigValid } from "./config";
 
-function hasFirebaseConfig(): boolean {
-  return !!(firebaseConfig.apiKey && firebaseConfig.projectId);
+if (typeof window !== "undefined" && !isFirebaseConfigValid()) {
+  console.error(
+    "[Firebase] Missing or invalid environment variables. " +
+    "Ensure NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, " +
+    "and NEXT_PUBLIC_FIREBASE_PROJECT_ID are set in Vercel."
+  );
 }
 
-const app: FirebaseApp = hasFirebaseConfig()
-  ? !getApps().length
+const app = isFirebaseConfigValid()
+  ? getApps().length === 0
     ? initializeApp(firebaseConfig)
     : getApps()[0]
-  : (null as unknown as FirebaseApp);
+  : null;
 
-const auth: Auth = app ? getAuth(app) : (null as unknown as Auth);
-const db: Firestore = app ? getFirestore(app) : (null as unknown as Firestore);
-const storage: FirebaseStorage = app ? getStorage(app) : (null as unknown as FirebaseStorage);
+const auth = app ? getAuth(app) : null;
+const db = app ? getFirestore(app) : null;
+const storage = app ? getStorage(app) : null;
 
 export { app, auth, db, storage };

@@ -10,7 +10,7 @@ export function useReportCardHistory(studentName?: string) {
   return useQuery({
     queryKey: ["report-cards", user?.uid, studentName],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !db) return [];
       const constraints = [where("userId", "==", user.uid), orderBy("createdAt", "desc")];
       const q = query(collection(db, "report_cards"), ...constraints);
       const snap = await getDocs(q);

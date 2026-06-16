@@ -7,7 +7,7 @@ export function useQualityReview(resourceId: string) {
   return useQuery({
     queryKey: ["quality-review", resourceId],
     queryFn: async () => {
-      if (!resourceId) return null;
+      if (!resourceId || !db) return null;
       const snap = await getDoc(doc(db, "quality_reviews", resourceId));
       return snap.exists() ? { id: snap.id, ...snap.data() } : null;
     },

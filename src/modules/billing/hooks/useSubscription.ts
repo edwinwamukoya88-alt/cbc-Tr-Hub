@@ -5,8 +5,6 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { db, app } from "@/lib/firebase/auth";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 
-const functions = getFunctions(app);
-
 interface SubscriptionData extends DocumentData {
   plan: string;
   status: string;
@@ -21,7 +19,7 @@ export function useSubscription() {
   const { data: subscription, isLoading } = useQuery<SubscriptionData | null>({
     queryKey: ["subscription", user?.uid],
     queryFn: async () => {
-      if (!user) return null;
+      if (!user || !db) return null;
       const snap = await getDoc(doc(db, "subscriptions", user.uid));
       return snap.exists() ? ({ id: snap.id, ...snap.data()! } as unknown as SubscriptionData) : null;
     },
@@ -30,6 +28,8 @@ export function useSubscription() {
 
   const createCheckout = useMutation({
     mutationFn: async (plan: string) => {
+      if (!app) throw new Error("Firebase is not configured");
+      const functions = getFunctions(app);
       const fn = httpsCallable(functions, "initiatePesapalPayment");
       const result = await fn({ plan });
       return result.data as { redirectUrl: string };
@@ -38,6 +38,8 @@ export function useSubscription() {
 
   const cancelSub = useMutation({
     mutationFn: async () => {
+      if (!app) throw new Error("Firebase is not configured");
+      const functions = getFunctions(app);
       const fn = httpsCallable(functions, "cancelSubscription");
       await fn();
     },

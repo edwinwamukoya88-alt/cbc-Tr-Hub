@@ -14,6 +14,7 @@ export function useAIGenerate(type: AIGenerationType) {
     setError(null);
     setResult(null);
     try {
+      if (!app) throw new Error("Firebase is not configured");
       const auth = getAuth(app);
       const user = auth.currentUser;
       if (!user) throw new Error("Not authenticated");
